@@ -102,12 +102,9 @@ const ProductDetail: React.FC = () => {
                 height: 'auto',
                 padding: '10px 20px',
                 backgroundColor: '#FFFFFF',
-                flexGrow: 1,
                 overflow: 'hidden'
             }}>
-
-                {/* Product Info */}
-                <div style={{display: 'flex', alignItems: 'baseline', justifyContent: 'space-between'}}>
+                <div style={{display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '10px 0'}}>
                     <div style={{fontSize: '40px', color: '#E91E63',}}>
                         <p style={{color: '#653AD7', fontSize: '28px', }}>{product.price}</p>
                     </div>
@@ -116,10 +113,10 @@ const ProductDetail: React.FC = () => {
                     </div>
                 </div>
 
-                <h1 style={{fontSize: '22px', fontWeight: 'bold'}}>{product.name}</h1>
+                <h1 style={{fontSize: '22px', fontWeight: 'bold', marginBottom: '10px'}}>{product.name}</h1>
                 <p style={{fontSize: '14px', color: '#666', marginBottom: '10px'}}>{product.description}</p>
 
-                <div style={{display: 'flex', gap: '20px',}}>
+                <div style={{display: 'flex', gap: '20px', margin: '20px 0 10px 0'}}>
                     <div style={{color: '#653AD7', display: 'flex', gap: '10px'}}>
                         <CarryOutOutlined style={{}}/>
                         <span>Хит товар</span>
@@ -150,13 +147,13 @@ const ProductDetail: React.FC = () => {
                 position: 'relative',
                 width: '100%',
                 height: 'auto',
-                padding: '10px 20px',
+                padding: '20px 20px',
                 background: '#FFFFFF'
             }}>
                 {/* Characteristics */}
                 <div>
                     <h3 style={{fontSize: '18px', marginBottom: '10px'}}>Характеристика</h3>
-                    <div>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
                         {Object.entries(product.characteristics).map(([key, value]) => (
                             <div key={key} style={{display: 'flex'}}>
                                 <span style={{width: '40%'}}>{key}</span>
@@ -169,9 +166,10 @@ const ProductDetail: React.FC = () => {
 
             <div style={{
                 position: 'relative',
+                bottom: '0',
                 width: '100%',
                 height: 'auto',
-                padding: '10px 20px',
+                padding: '20px 20px',
                 margin: '10px 0 0 0',
                 background: '#FFFFFF'
             }}>
@@ -202,7 +200,8 @@ const ProductDetail: React.FC = () => {
                             color: '#fff',
                             fontSize: '16px',
                             padding: '8px 16px',
-                            height: '48px'
+                            height: '48px',
+                            marginTop: '10px'
                         }}
                     >
                         {product.price} Купить
