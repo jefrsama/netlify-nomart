@@ -34,13 +34,13 @@ const OrderSummary: React.FC = () => {
     return (
         <div style={{backgroundColor: '#f5f5f5', minHeight: '100vh'}}>
             {/* Кнопка "Назад" и заголовок */}
-            <div style={{padding: '20px', display: 'flex', alignItems: 'center', backgroundColor: '#fff', height: '100%'}}>
+            <div style={{padding: '20px', display: 'flex', alignItems: 'center', backgroundColor: '#fff', height: 'auto'}}>
                 <Button type="link" onClick={handleBack} style={{fontSize: '24px', padding: 0, color: 'black'}}>
                     ←
                 </Button>
                 <h2 style={{flexGrow: 1, textAlign: 'center', margin: 0}}>Оформление заказа</h2>
             </div>
-            <div style={{padding: '20px'}}>
+            <div>
                 {/* Информация о продукте */}
                 <div style={{
                     display: 'flex',
@@ -61,21 +61,45 @@ const OrderSummary: React.FC = () => {
                         <div style={{flexGrow: 1}}>
                             <p style={{fontWeight: '500', marginBottom: '5px'}}>{product.description}</p>
 
-                            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                                <Button onClick={handleDecreaseQuantity} style={{
-                                    backgroundColor: '#EBEDF0',
-                                    borderRadius: '50%',
-                                    width: '32px',
-                                    height: '32px'
-                                }}>-</Button>
-                                <span>{quantity}</span>
-                                <Button onClick={handleIncreaseQuantity} style={{
-                                    backgroundColor: '#FF5720',
-                                    color: '#FFFFFF',
-                                    borderRadius: '50%',
-                                    width: '32px',
-                                    height: '32px'
-                                }}>+</Button>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                                <Button
+                                    onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                                    style={{
+                                        borderRadius: '50%',
+                                        width: '34px',
+                                        height: '34px',
+                                        backgroundColor: '#EBEDF0',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        fontSize: '15px',
+                                        lineHeight: '1',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    -
+                                </Button>
+                                <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{quantity}</span>
+                                <Button
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    style={{
+                                        borderRadius: '50%',
+                                        width: '34px',
+                                        height: '34px',
+                                        backgroundColor: '#FF5720',
+                                        color: '#FFFFFF',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        fontSize: '15px',
+                                        lineHeight: '1',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    +
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -95,7 +119,7 @@ const OrderSummary: React.FC = () => {
                         <span style={{fontWeight: '600'}}>{totalPrice} т</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
-                        <span style={{color: '#4BAB00'}}>Доставка</span>
+                    <span style={{color: '#4BAB00'}}>Доставка</span>
                         <span style={{fontWeight: '600', color: '#4BAB00'}}>{deliveryCost} т</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
@@ -112,8 +136,8 @@ const OrderSummary: React.FC = () => {
                         backgroundColor: '#FF6A00',
                         color: '#fff',
                         fontSize: '16px',
-                        padding: '15px 0',
-                        borderRadius: '8px'
+                        padding: '8px 16px',
+                        height: '48px'
                     }}
                     onClick={handleOrder}
                 >

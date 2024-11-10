@@ -7,23 +7,39 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #F2F2F2;
-    /* --foreground: #ededed; */
   }
 }
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  max-height: 100vh;
   height: 100vh;
-}
-body {
-  color: var(--foreground);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: var(--background);
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  body {
+    width: 100%; /* Для мобильных устройств */
+  }
+}
+
+@media (min-width: 769px) {
+  body {
+    width: 375px; /* Фиксированная ширина для десктопа */
+    height: 100%;
+  }
 }
 
 * {
@@ -45,12 +61,48 @@ a {
 
 /* Reset styles for lists */
 ul, ol {
-  margin: 0;        /* Remove default margin */
-  padding: 0;       /* Remove default padding */
-  list-style: none; /* Remove default bullets/numbers */
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* If you want to keep the default list style for ordered lists (ol) */
+/* Если вы хотите оставить нумерацию в упорядоченных списках */
 ol {
-  list-style-type: decimal; /* Add default numbering back */
+  list-style-type: decimal;
+}
+
+.swiper-pagination {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.swiper-pagination-bullet {
+  background-color: orange !important;
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: orange !important;
+  opacity: 1;
+}
+.page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+button {
+  background-color: #FF6A00;
+  color: #fff;
+  font-size: 16px;
+  padding: 8px 16px;
+  height: 48px;
 }

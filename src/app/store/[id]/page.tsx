@@ -84,7 +84,7 @@ const StorePage: React.FC = () => {
   }, [id, dispatch]);
 
   return (
-      <div style={{ backgroundColor: 'var(--background)' }}>
+      <div style={{ backgroundColor: 'var(--background)' }} className="page-container">
         {/* Store Header */}
         <div style={{ }}>
           <div style={{ position: 'relative', width: '100%', height: '150px', overflow: 'hidden' }}>
