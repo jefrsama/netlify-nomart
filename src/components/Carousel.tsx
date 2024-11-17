@@ -15,7 +15,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
     const [cursorPosition, setCursorPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
 
     // Константа для смещения лупы (в пикселях)
-    const lensOffset = 40; // 40px смещение вправо
+    const lensOffset = 40;
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, imgRef: HTMLImageElement) => {
         const rect = imgRef.getBoundingClientRect();
@@ -39,7 +39,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
             style={{ position: 'relative' }}
         >
             {images.map((img, index) => (
-                <SwiperSlide key={index} style={{ position: 'relative', height: '300px' }}>
+                <SwiperSlide key={index} style={{ position: 'relative', height: '30vh' }}>
                     <div
                         className={styles['image-container']}
                         onMouseEnter={() => setZoomed(true)}
@@ -48,7 +48,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
                         <Image
                             src={img}
                             alt={`Product Image ${index + 1}`}
-                            layout="fill"   // Используем responsive для адаптации
+                            layout="fill"
                             className={styles['zoom-image']}
                             objectFit="cover"
                             onMouseMove={(e) => handleMouseMove(e, e.currentTarget)}

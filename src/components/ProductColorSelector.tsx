@@ -31,13 +31,13 @@ const ProductColorSelector: React.FC<ProductColorSelectorProps> =
                             onClick={() => onColorClick(index)}
                         >
                             {selectedColorIndex === index && (
-                                <span style={{margin: '10px 0'}}>Цвета: <span
+                                <span style={{margin: '5px 0'}}>Цвета: <span
                                     style={{fontWeight: 'bold'}}>{color.name}</span></span>
                             )}
                         </div>
                     ))}
                 </div>
-                <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                     {productColors.map((color, index) => (
                         <div
                             key={color.id}
@@ -45,8 +45,8 @@ const ProductColorSelector: React.FC<ProductColorSelectorProps> =
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                padding: '5px',
-                                border: selectedColorIndex === index ? '2px solid orange' : '2px solid transparent',
+                                padding: '2px',
+                                border: selectedColorIndex === index ? '2px solid #FF5720' : '2px solid transparent',
                                 borderRadius: '4px',
                                 position: 'relative',
                                 cursor: 'pointer',

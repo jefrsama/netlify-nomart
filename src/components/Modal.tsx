@@ -42,7 +42,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
                     padding: '30px 20px',
                     borderRadius: '16px 16px 0 0',
                     width: '100%',
-                    maxWidth: '375px',
                     boxShadow: '0px -5px 15px rgba(0, 0, 0, 0.3)',
                     transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
                     transition: 'transform 0.5s ease',
