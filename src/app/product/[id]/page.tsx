@@ -20,6 +20,8 @@ const ProductDetail: React.FC = () => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
 
+    const [isExpanded, setIsExpanded] = useState(false);
+
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
@@ -34,6 +36,10 @@ const ProductDetail: React.FC = () => {
     const handleOrder = () => {
         // Переход на страницу с параметрами
         router.push(`/order-summary?product=${JSON.stringify(product)}&totalPrice=3624&deliveryCost=7233`);
+    };
+
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
     };
 
     // Example product data
@@ -87,7 +93,8 @@ const ProductDetail: React.FC = () => {
             padding: 0,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
+            overflowY: 'auto',
+            height: '100vh',
         }}>
             <div style={{
                 width: '100%',
@@ -104,7 +111,6 @@ const ProductDetail: React.FC = () => {
                 height: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                overflowY: 'auto'
             }}>
                 <div style={{
                     position: 'relative',
@@ -199,13 +205,19 @@ const ProductDetail: React.FC = () => {
                                 </div>
                             ))}
                         </div>
-                        <p style={{
-                            marginTop: '10px',
-                            color: '#FF5720',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            font: 'SF Pro Display',
-                        }}>Показать полностью</p>
+                        <p
+                            onClick={toggleExpand}
+                            style={{
+                                marginTop: '10px',
+                                color: '#FF5720',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                textDecoration: 'underline',
+                            }}
+                        >
+                            {isExpanded ? 'Скрыть' : 'Показать полностью'}
+                        </p>
                     </div>
                 </div>
 
@@ -265,144 +277,143 @@ const ProductDetail: React.FC = () => {
                         {product.price} Купить
                     </Button>
                 </div>
-
-            </div>
-            {/* Модальное окно для выбора деталей продукта */}
-            <Modal isOpen={isModalOpen} onClose={closeModal}>
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '20px'}}>
-                    <Image
-                        src={product.product_colors[selectedColorIndex].image}
-                        alt={product.product_colors[selectedColorIndex].name}
-                        width={70}
-                        height={70}
-                        style={{borderRadius: '4px', marginRight: '10px'}}
-                    />
-                    <div style={{margin: '12px 0'}}>
-                        <p style={{
-                            fontFamily: 'SF Pro Text',
-                            fontSize: '14px',
-                            fontWeight: '400',
-                            lineHeight: '16.71px',
-                            textAlign: 'left'
-                        }}>{product.description}</p>
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <div style={{textAlign: 'end'}}>
-                                <p style={{
-                                    fontFamily: 'SF Pro Display',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    lineHeight: '19px',
-                                    textAlign: 'left'
-                                }}>{product.price}</p>
-                            </div>
-                            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                                <Button
-                                    onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
-                                    style={{
-                                        borderRadius: '50%',
-                                        width: '34px',
-                                        height: '34px',
-                                        backgroundColor: '#EBEDF0',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        fontSize: '15px',
-                                        lineHeight: '1',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    -
-                                </Button>
-                                <span style={{fontSize: '18px', fontWeight: 'bold'}}>{quantity}</span>
-                                <Button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    style={{
-                                        borderRadius: '50%',
-                                        width: '34px',
-                                        height: '34px',
-                                        backgroundColor: '#FF5720',
-                                        color: '#FFFFFF',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        fontSize: '15px',
-                                        lineHeight: '1',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    +
-                                </Button>
+                {/* Модальное окно для выбора деталей продукта */}
+                <Modal isOpen={isModalOpen} onClose={closeModal}>
+                    <div style={{display: 'flex', alignItems: 'center', marginBottom: '20px'}}>
+                        <Image
+                            src={product.product_colors[selectedColorIndex].image}
+                            alt={product.product_colors[selectedColorIndex].name}
+                            width={70}
+                            height={70}
+                            style={{borderRadius: '4px', marginRight: '10px'}}
+                        />
+                        <div style={{margin: '12px 0'}}>
+                            <p style={{
+                                fontFamily: 'SF Pro Text',
+                                fontSize: '14px',
+                                fontWeight: '400',
+                                lineHeight: '16.71px',
+                                textAlign: 'left'
+                            }}>{product.description}</p>
+                            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                <div style={{textAlign: 'end'}}>
+                                    <p style={{
+                                        fontFamily: 'SF Pro Display',
+                                        fontSize: '16px',
+                                        fontWeight: '600',
+                                        lineHeight: '19px',
+                                        textAlign: 'left'
+                                    }}>{product.price}</p>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                    <Button
+                                        onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                                        style={{
+                                            borderRadius: '50%',
+                                            width: '34px',
+                                            height: '34px',
+                                            backgroundColor: '#EBEDF0',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            fontSize: '15px',
+                                            lineHeight: '1',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        -
+                                    </Button>
+                                    <span style={{fontSize: '18px', fontWeight: 'bold'}}>{quantity}</span>
+                                    <Button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        style={{
+                                            borderRadius: '50%',
+                                            width: '34px',
+                                            height: '34px',
+                                            backgroundColor: '#FF5720',
+                                            color: '#FFFFFF',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            fontSize: '15px',
+                                            lineHeight: '1',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        +
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Блок для выбора цвета */}
-                <ProductColorSelector
-                    productColors={product.product_colors}
-                    selectedColorIndex={selectedColorIndex}
-                    onColorClick={handleColorClick}
-                />
-                <div style={{margin: '10px 0'}}>
-                    <div style={{display: 'flex', gap: '10px'}}>
-                        {product.colors.map((color, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    backgroundColor: color,
-                                    border: selectedColorIndex === index ? '2px solid orange' : '1px solid #ccc',
-                                    cursor: 'pointer',
-                                    borderRadius: '50%',
-                                }}
-                                onClick={() => handleColorClick(index)}
-                            />
-                        ))}
+                    {/* Блок для выбора цвета */}
+                    <ProductColorSelector
+                        productColors={product.product_colors}
+                        selectedColorIndex={selectedColorIndex}
+                        onColorClick={handleColorClick}
+                    />
+                    <div style={{margin: '10px 0'}}>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                            {product.colors.map((color, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        width: '24px',
+                                        height: '24px',
+                                        backgroundColor: color,
+                                        border: selectedColorIndex === index ? '2px solid orange' : '1px solid #ccc',
+                                        cursor: 'pointer',
+                                        borderRadius: '50%',
+                                    }}
+                                    onClick={() => handleColorClick(index)}
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                {/* Выбор размера */}
-                <div style={{margin: '10px 0'}}>
-                    <h3 style={{margin: '5px 0'}}>Размер:</h3>
-                    <div style={{display: 'flex', gap: '10px'}}>
-                        {product.sizes.map((size) => (
-                            <div
-                                key={size}
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    backgroundColor: selectedSize === size ? '#FF6A00' : '#f0f0f0',
-                                    color: selectedSize === size ? '#fff' : '#333',
-                                }}
-                                onClick={() => setSelectedSize(size)}
-                            >
-                                {size}
-                            </div>
-                        ))}
+                    {/* Выбор размера */}
+                    <div style={{margin: '10px 0'}}>
+                        <h3 style={{margin: '5px 0'}}>Размер:</h3>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                            {product.sizes.map((size) => (
+                                <div
+                                    key={size}
+                                    style={{
+                                        padding: '8px 16px',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        backgroundColor: selectedSize === size ? '#FF6A00' : '#f0f0f0',
+                                        color: selectedSize === size ? '#fff' : '#333',
+                                    }}
+                                    onClick={() => setSelectedSize(size)}
+                                >
+                                    {size}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                {/* Кастомная кнопка Оформить заказ */}
-                <Button
-                    type="primary"
-                    block
-                    style={{
-                        backgroundColor: '#FF6A00',
-                        color: '#fff',
-                        fontSize: '16px',
-                        padding: '8px 16px',
-                        marginTop: '20px',
-                        height: '48px'
-                    }}
-                    onClick={handleOrder}
-                >
-                    Оформить заказ
-                </Button>
-            </Modal>
+                    {/* Кастомная кнопка Оформить заказ */}
+                    <Button
+                        type="primary"
+                        block
+                        style={{
+                            backgroundColor: '#FF6A00',
+                            color: '#fff',
+                            fontSize: '16px',
+                            padding: '8px 16px',
+                            marginTop: '20px',
+                            height: '48px'
+                        }}
+                        onClick={handleOrder}
+                    >
+                        Оформить заказ
+                    </Button>
+                </Modal>
+            </div>
         </div>
     );
 };

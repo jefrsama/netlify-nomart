@@ -105,3 +105,13 @@ button {
   padding: 8px 16px;
   height: 48px;
 }
+
+.modal-opened {
+  max-width: 375px;
+}
+
+@media (max-width: 769px) {
+  .modal-opened {
+    max-width: 100%;
+  }
+}

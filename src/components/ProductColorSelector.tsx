@@ -56,11 +56,11 @@ const ProductColorSelector: React.FC<ProductColorSelectorProps> =
                             <Image src={color.image} alt={color.name} width={60} height={60}
                                    style={{borderRadius: '4px'}}/>
 
-                            {color.isPopular && (
-                                <div style={{position: 'absolute', bottom: '-2px', left: '0px'}}>
-                                    <FireOutlined style={{fontSize: '16px'}}/>
-                                </div>
-                            )}
+                            {/*{color.isPopular && (*/}
+                            {/*    <div style={{position: 'absolute', bottom: '-2px', left: '0px'}}>*/}
+                            {/*        <FireOutlined style={{fontSize: '16px'}}/>*/}
+                            {/*    </div>*/}
+                            {/*)}*/}
                         </div>
                     ))}
                 </div>
