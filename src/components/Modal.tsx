@@ -65,7 +65,7 @@
                             cursor: 'pointer',
                         }}
                     >
-                        &times;
+                        <img src="/x.svg" alt=""/>
                     </button>
 
 

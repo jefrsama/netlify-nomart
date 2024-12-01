@@ -1,21 +1,59 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { Button } from 'antd';
+import React, {useState} from "react";
+import {useParams, useRouter} from "next/navigation";
+import {Button} from "antd";
 import Image from 'next/image';
+import axios from "axios";
 
-const OrderSummary: React.FC = () => {
-    const router = useRouter();
+const OrderSummary = () => {
     const params = useParams();
-    const id = params?.id;
+    const orderId = params?.id;
+    const [orderData, setOrderData] = useState<any | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     const [totalPrice, setTotalPrice] = useState(4200);
     const [deliveryCost, setDeliveryCost] = useState(7233);
     const [quantity, setQuantity] = useState(1);
 
+    const handleIncreaseQuantity = () => setQuantity(quantity + 1);
+    const handleDecreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
+    const handleBack = () => router.back();
+    const handleOrder = () => router.push(`/payment/${orderId}`);
+
+    const fetchOrderData = async () => {
+        if (!orderId) {
+            setError("ID заказа отсутствует в маршруте.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("Пользователь не авторизован.");
+            }
+
+            const response = await axios.get(`/api/orders/${orderId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setOrderData(response.data);
+        } catch (err: any) {
+            console.error("Ошибка при загрузке данных заказа:", err);
+            setError(
+                err.response?.data?.message || "Не удалось загрузить данные заказа."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const product = {
-        id,
         name: 'Красивый и современный декор для дома, кошка с поднятой лапой.',
         price: 3624,
         weight: '300 гр',
@@ -23,24 +61,28 @@ const OrderSummary: React.FC = () => {
         image: 'https://placehold.co/100x100',
         description: 'Красивый и современный декор для дома, кошка с поднятой лапой.',
     };
-
-    const handleIncreaseQuantity = () => setQuantity(quantity + 1);
-    const handleDecreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
-    const handleBack = () => router.back();
-    const handleOrder = () => router.push('/payment');
-
     const calculatedTotalPrice = product.price * quantity;
 
     return (
-        <div style={{backgroundColor: '#f5f5f5', minHeight: '100vh'}}>
+        <div style={{backgroundColor: '#f5f5f5', minHeight: '100vh', width: '100%', position: 'relative'}}>
             {/* Кнопка "Назад" и заголовок */}
-            <div style={{padding: '20px', display: 'flex', alignItems: 'center', backgroundColor: '#fff', height: 'auto'}}>
+            <div style={{
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#fff',
+                height: 'auto'
+            }}>
                 <Button type="link" onClick={handleBack} style={{fontSize: '24px', padding: 0, color: 'black'}}>
                     ←
                 </Button>
-                <h2 style={{flexGrow: 1, textAlign: 'center', margin: 0}}>Оформление заказа</h2>
+                <h3 style={{flexGrow: 1, textAlign: 'center', margin: 0}}>Оформление заказа</h3>
             </div>
-            <div>
+
+            <div style={{
+                padding: '20px',
+                height: 'auto',
+            }}>
                 {/* Информация о продукте */}
                 <div style={{
                     display: 'flex',
@@ -63,38 +105,34 @@ const OrderSummary: React.FC = () => {
 
                             <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
                                 <Button
-                                    onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                                    onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
                                     style={{
                                         borderRadius: '50%',
-                                        width: '34px',
-                                        height: '34px',
+                                        width: '30px',
+                                        height: '30px',
                                         backgroundColor: '#EBEDF0',
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        fontSize: '15px',
                                         lineHeight: '1',
-                                        border: 'none',
                                         cursor: 'pointer',
                                     }}
                                 >
                                     -
                                 </Button>
-                                <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{quantity}</span>
+                                <span style={{fontSize: '18px', fontWeight: 'bold'}}>{quantity}</span>
                                 <Button
-                                    onClick={() => setQuantity(quantity + 1)}
+                                    onClick={() => setQuantity((prev) => prev + 1)}
                                     style={{
                                         borderRadius: '50%',
-                                        width: '34px',
-                                        height: '34px',
+                                        width: '30px',
+                                        height: '30px',
                                         backgroundColor: '#FF5720',
                                         color: '#FFFFFF',
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        fontSize: '15px',
                                         lineHeight: '1',
-                                        border: 'none',
                                         cursor: 'pointer',
                                     }}
                                 >
@@ -119,7 +157,7 @@ const OrderSummary: React.FC = () => {
                         <span style={{fontWeight: '600'}}>{totalPrice} т</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
-                    <span style={{color: '#4BAB00'}}>Доставка</span>
+                        <span style={{color: '#4BAB00'}}>Доставка</span>
                         <span style={{fontWeight: '600', color: '#4BAB00'}}>{deliveryCost} т</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>

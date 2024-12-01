@@ -1,50 +1,111 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { Row, Col, Button, Rate, Select } from 'antd';
+import {useRouter, useSearchParams} from 'next/navigation';
+import React, {useEffect, useState} from 'react';
+import {Row, Col, Button, Rate, Select, message} from 'antd';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { CarOutlined, CarryOutOutlined, FireOutlined } from '@ant-design/icons';
 import ProductColorSelector from "@/components/ProductColorSelector";
-import Carousel from '@/components/Carousel'; // Импортируем компонент карусели
+import Carousel from '@/components/Carousel';
 import Modal from '@/components/Modal';
+import axios, {AxiosError} from "axios";
+import { createOrder } from '@/services/orderService';
+import AuthModal from "@/components/AuthModal";
 
 const ProductDetail: React.FC = () => {
-    const router = useRouter();
     const params = useParams();
-    const id = params?.id;
+    const productId = params?.id;
+    const router = useRouter();
+
+    // States
+    const [product, setProduct] = useState<any | null>(null);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
-
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
+
+    // Fetch product data from sessionStorage
+    useEffect(() => {
+        const productData = sessionStorage.getItem("selectedProduct");
+        if (productData) {
+            setProduct(JSON.parse(productData));
+        } else {
+            console.error("Данные продукта не найдены!");
+        }
+    }, []);
+
+    if (!product) {
+        return <div>Продукт не найден</div>;
+    }
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
+    const handleColorClick = (index: any) => setSelectedColorIndex(index);
 
-    const handleColorClick = (index: any) => {
-        setSelectedColorIndex(index);
+    const handleOrder = async () => {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            setIsAuthModalVisible(true);
+            return;
+        }
+
+        const payload = {
+            order_items: [
+                {
+                    store_product_id: product.product_id,
+                    product_amount: Math.max(1, Number(quantity)),
+                },
+            ],
+        };
+
+        console.log('Payload для создания заказа:', payload);
+
+        try {
+            const orderData = await createOrder(payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            console.log('Order создан успешно:', orderData);
+
+            router.push(`/order-summary/${orderData.id}`);
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                console.error('Ошибка сервера:', err.response?.data);
+
+                if (err.response?.status === 400) {
+                    message.error(
+                        `Ошибка в запросе: ${
+                            err.response?.data?.message || 'Проверьте переданные данные'
+                        }`
+                    );
+                } else {
+                    message.error('Ошибка при оформлении заказа!');
+                }
+            } else if (err instanceof Error) {
+                console.error('Неизвестная ошибка:', err.message);
+                message.error('Произошла ошибка: ' + err.message);
+            } else {
+                console.error('Неизвестная ошибка:', err);
+                message.error('Произошла неизвестная ошибка.');
+            }
+        }
     };
 
-    const showModal = () => {
-        setIsModalVisible(true);
+    const handleAuthComplete = () => {
+        setIsAuthModalVisible(false);
+        handleOrder();
     };
 
-    const handleOrder = () => {
-        // Переход на страницу с параметрами
-        router.push(`/order-summary?product=${JSON.stringify(product)}&totalPrice=3624&deliveryCost=7233`);
-    };
-
-    const toggleExpand = () => {
-        setIsExpanded(!isExpanded);
-    };
+    const toggleExpand = () => setIsExpanded(!isExpanded);
 
     // Example product data
-    const product = {
-        id,
+    const product1 = {
         name: 'Красивая белая кофта, осенняя',
         price: '1600т',
         image: [
@@ -101,7 +162,7 @@ const ProductDetail: React.FC = () => {
                 height: '30vh',
                 flexShrink: 0
             }}>
-                <Carousel images={product.image}/>
+                <Carousel images={product1.image}/>
             </div>
 
             <div style={{
@@ -171,7 +232,7 @@ const ProductDetail: React.FC = () => {
                     margin: '10px 0'
                 }}>
                     <ProductColorSelector
-                        productColors={product.product_colors}
+                        productColors={product1.product_colors}
                         selectedColorIndex={selectedColorIndex}
                         onColorClick={handleColorClick}
                     />
@@ -188,7 +249,7 @@ const ProductDetail: React.FC = () => {
                     <div>
                         <h3 style={{fontSize: '18px', marginBottom: '10px'}}>Характеристика</h3>
                         <div style={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
-                            {Object.entries(product.characteristics).map(([key, value]) => (
+                            {Object.entries(product1.characteristics).map(([key, value]) => (
                                 <div key={key} style={{display: 'flex'}}>
                                     <span style={{
                                         width: '40%',
@@ -231,7 +292,7 @@ const ProductDetail: React.FC = () => {
                     background: '#FFFFFF'
                 }}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-                        <Image src={product.store.image} alt={product.store.name} width={42} height={42}/>
+                        <Image src={product1.store.image} alt={product1.store.name} width={42} height={42} style={{borderRadius: '4px',}}/>
 
                         <div style={{
                             display: 'flex',
@@ -239,15 +300,15 @@ const ProductDetail: React.FC = () => {
                             gap: '5px'
                         }}>
                             <h3>
-                                {product.store.name}
+                                {product1.store.name}
                             </h3>
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '10px',
                             }}>
-                                {product.store.rating}
-                                <Rate disabled defaultValue={product.store.rating}/>
+                                {product1.store.rating}
+                                <Rate disabled defaultValue={product1.store.rating}/>
                             </div>
                         </div>
                     </div>
@@ -279,18 +340,17 @@ const ProductDetail: React.FC = () => {
                 </div>
                 {/* Модальное окно для выбора деталей продукта */}
                 <Modal isOpen={isModalOpen} onClose={closeModal}>
-                    <div style={{display: 'flex', alignItems: 'center', marginBottom: '20px'}}>
+                    <div style={{display: 'flex', top: '0', margin: '20px 0', width: '100%'}}>
                         <Image
-                            src={product.product_colors[selectedColorIndex].image}
-                            alt={product.product_colors[selectedColorIndex].name}
+                            src={product1.product_colors[selectedColorIndex].image}
+                            alt={product1.product_colors[selectedColorIndex].name}
                             width={70}
                             height={70}
                             style={{borderRadius: '4px', marginRight: '10px'}}
                         />
-                        <div style={{margin: '12px 0'}}>
+                        <div style={{margin: '2px 0', width: '100%'}}>
                             <p style={{
-                                fontFamily: 'SF Pro Text',
-                                fontSize: '14px',
+                                fontSize: '18px',
                                 fontWeight: '400',
                                 lineHeight: '16.71px',
                                 textAlign: 'left'
@@ -298,27 +358,24 @@ const ProductDetail: React.FC = () => {
                             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                                 <div style={{textAlign: 'end'}}>
                                     <p style={{
-                                        fontFamily: 'SF Pro Display',
                                         fontSize: '16px',
                                         fontWeight: '600',
                                         lineHeight: '19px',
                                         textAlign: 'left'
-                                    }}>{product.price}</p>
+                                    }}>{product.price} ₸</p>
                                 </div>
                                 <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
                                     <Button
-                                        onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                                        onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
                                         style={{
                                             borderRadius: '50%',
-                                            width: '34px',
-                                            height: '34px',
+                                            width: '30px',
+                                            height: '30px',
                                             backgroundColor: '#EBEDF0',
                                             display: 'flex',
                                             justifyContent: 'center',
                                             alignItems: 'center',
-                                            fontSize: '15px',
                                             lineHeight: '1',
-                                            border: 'none',
                                             cursor: 'pointer',
                                         }}
                                     >
@@ -326,19 +383,17 @@ const ProductDetail: React.FC = () => {
                                     </Button>
                                     <span style={{fontSize: '18px', fontWeight: 'bold'}}>{quantity}</span>
                                     <Button
-                                        onClick={() => setQuantity(quantity + 1)}
+                                        onClick={() => setQuantity((prev) => prev + 1)}
                                         style={{
                                             borderRadius: '50%',
-                                            width: '34px',
-                                            height: '34px',
+                                            width: '30px',
+                                            height: '30px',
                                             backgroundColor: '#FF5720',
                                             color: '#FFFFFF',
                                             display: 'flex',
                                             justifyContent: 'center',
                                             alignItems: 'center',
-                                            fontSize: '15px',
                                             lineHeight: '1',
-                                            border: 'none',
                                             cursor: 'pointer',
                                         }}
                                     >
@@ -351,13 +406,13 @@ const ProductDetail: React.FC = () => {
 
                     {/* Блок для выбора цвета */}
                     <ProductColorSelector
-                        productColors={product.product_colors}
+                        productColors={product1.product_colors}
                         selectedColorIndex={selectedColorIndex}
                         onColorClick={handleColorClick}
                     />
                     <div style={{margin: '10px 0'}}>
                         <div style={{display: 'flex', gap: '10px'}}>
-                            {product.colors.map((color, index) => (
+                            {product1.colors.map((color, index) => (
                                 <div
                                     key={index}
                                     style={{
@@ -375,10 +430,10 @@ const ProductDetail: React.FC = () => {
                     </div>
 
                     {/* Выбор размера */}
-                    <div style={{margin: '10px 0'}}>
-                        <h3 style={{margin: '5px 0'}}>Размер:</h3>
+                    <div style={{margin: '20px 0'}}>
+                        <h3 style={{margin: '10px 0'}}>Размер:</h3>
                         <div style={{display: 'flex', gap: '10px'}}>
-                            {product.sizes.map((size) => (
+                            {product1.sizes.map((size) => (
                                 <div
                                     key={size}
                                     style={{
@@ -413,6 +468,9 @@ const ProductDetail: React.FC = () => {
                         Оформить заказ
                     </Button>
                 </Modal>
+
+                {/* Модальное окно для аутентификации */}
+                {isAuthModalVisible && <AuthModal onClose={() => setIsAuthModalVisible(false)} />}
             </div>
         </div>
     );
