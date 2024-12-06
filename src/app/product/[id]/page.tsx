@@ -221,7 +221,7 @@ const ProductDetail: React.FC = () => {
                             padding: '4px',
                             borderRadius: '4px'
                         }}>
-                            <p>В наличии: {product?.availableQuantity || '0'} шт.</p>
+                            <p>В наличии: {/*product?.product.availableQuantity ||*/}{'0'} шт.</p>
                         </div>
                     </div>
 
