@@ -26,9 +26,23 @@ const StorePage = ({ params }: { params: { name: string } }) => {
      const [activeTab, setActiveTab] = useState('1');
 
     useEffect(() => {
-        setIsLoading(true);
-        dispatch(fetchStoreData(name));
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                await dispatch(fetchStoreData(name));
+            } catch (err) {
+                console.error("Ошибка при загрузке данных магазина:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
     }, [dispatch, name, setIsLoading]);
+
+    // useEffect(() => {
+    //     setIsLoading(true);
+    //     dispatch(fetchStoreData(name));
+    // }, [dispatch, name, setIsLoading]);
 
     if (isLoading) {
         return <Spin tip="Загрузка..." style={{ textAlign: 'center', marginTop: '20px' }} />;
