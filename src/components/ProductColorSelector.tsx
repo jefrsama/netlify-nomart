@@ -31,7 +31,7 @@ const ProductColorSelector: React.FC<ProductColorSelectorProps> =
                             onClick={() => onColorClick(index)}
                         >
                             {selectedColorIndex === index && (
-                                <span style={{margin: '5px 0'}}>Цвета: <span
+                                <span style={{margin: '5px 0'}}>Цвет:  <span
                                     style={{fontWeight: 'bold'}}>{color.name}</span></span>
                             )}
                         </div>

@@ -1,74 +1,70 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from './index';
+'use client';
 
-interface StoreState {
-  store: {
-    name: string;
-    id: string;
-    logo?: string;
-  };
-  products: Array<{
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-  }>;
-  isLoading: boolean;
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getStoreByName } from '@/services/storeService';
+import { StoreProduct } from '@/store/types';
+
+// Интерфейс для данных магазина
+interface Store {
+    logo?: string | null;
+    name?: string;
+    is_verified?: boolean;
+    description?: string;
+    rating?: number;
+    user?: {
+        avatar?: string | null;
+        [key: string]: any;
+    };
+    storeProducts: StoreProduct[];
 }
 
+// Интерфейс для состояния Redux
+interface StoreState {
+    store: Store | null;
+    isLoading: boolean;
+    error: string | null;
+}
+
+// Начальное состояние
 const initialState: StoreState = {
-  store: {
-    name: '',
-    id: '',
-  },
-  products: [],
-  isLoading: false,
+    store: null,
+    isLoading: false,
+    error: null,
 };
 
-// Асинхронный thunk для получения данных магазина
+// Асинхронный thunk для загрузки данных магазина
 export const fetchStoreData = createAsyncThunk(
-  'store/fetchStoreData',
-  async (id: string) => {
-    const response = await fetch(`/api/store/${id}`);
-    const data = await response.json();
-    return data;
-  }
+    'store/fetchStoreData',
+    async (name: string, { rejectWithValue }) => {
+        try {
+            const data: Store = await getStoreByName(name); // Указываем тип данных для результата
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
 );
 
-// Асинхронный thunk для получения товаров магазина
-export const fetchStoreProducts = createAsyncThunk(
-  'store/fetchStoreProducts',
-  async (id: string) => {
-    const response = await fetch(`/api/store/${id}/products`);
-    const data = await response.json();
-    return data;
-  }
-);
-
-export const storeSlice = createSlice({
-  name: 'store',
-  initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    // Combined fulfilled case for fetchStoreData
-    builder.addCase(fetchStoreData.fulfilled, (state, action) => {
-      state.store = action.payload;
-      state.isLoading = false; // Update both store and isLoading here
-    });
-
-    // Handle pending and rejected cases for fetchStoreData
-    builder.addCase(fetchStoreData.pending, (state) => {
-      state.isLoading = true;
-    });
-    builder.addCase(fetchStoreData.rejected, (state) => {
-      state.isLoading = false;
-    });
-
-    // Separate fulfilled case for fetchStoreProducts
-    builder.addCase(fetchStoreProducts.fulfilled, (state, action) => {
-      state.products = action.payload;
-    });
-  },
+// Slice для управления состоянием магазина
+const storeSlice = createSlice({
+    name: 'store',
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchStoreData.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchStoreData.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.store = action.payload as Store;
+            })
+            .addCase(fetchStoreData.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+            });
+    },
 });
 
 export default storeSlice.reducer;

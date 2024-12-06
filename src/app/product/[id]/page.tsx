@@ -1,9 +1,8 @@
 'use client';
-import {useRouter, useSearchParams} from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import React, {useEffect, useState} from 'react';
-import {Row, Col, Button, Rate, Select, message} from 'antd';
+import {Row, Col, Button, Rate, Select, message, Spin, Alert} from 'antd';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
 import { CarOutlined, CarryOutOutlined, FireOutlined } from '@ant-design/icons';
 import ProductColorSelector from "@/components/ProductColorSelector";
 import Carousel from '@/components/Carousel';
@@ -11,14 +10,21 @@ import Modal from '@/components/Modal';
 import axios, {AxiosError} from "axios";
 import { createOrder } from '@/services/orderService';
 import AuthModal from "@/components/AuthModal";
+import { useLoading } from '@/contexts/LoadingContext';
+import {getStoreByName} from "@/services/storeService";
+import {useSelector} from "react-redux";
+import {RootState, store} from "@/store";
+import {fetchStoreData} from "@/store/storeSlice";
+import { StoreProduct } from '@/store/types';
+import RatingStars from "@/components/RatingStars";
 
 const ProductDetail: React.FC = () => {
     const params = useParams();
     const productId = params?.id;
     const router = useRouter();
+    const { setIsLoading } = useLoading();
 
     // States
-    const [product, setProduct] = useState<any | null>(null);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -26,16 +32,22 @@ const ProductDetail: React.FC = () => {
     const [quantity, setQuantity] = useState(1);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Fetch product data from sessionStorage
+    // Получение данных из store
+    const storeData = useSelector((state: RootState) => state.store.store);
+
     useEffect(() => {
-        const productData = sessionStorage.getItem("selectedProduct");
-        if (productData) {
-            setProduct(JSON.parse(productData));
-        } else {
-            console.error("Данные продукта не найдены!");
-        }
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1000); // 1 секунда
+
+        return () => clearTimeout(timer); // Очистка таймера при размонтировании
     }, []);
+
+    // Поиск продукта в storeData
+    const product = storeData?.storeProducts?.find((p: StoreProduct) => p.product_id === productId);
 
     if (!product) {
         return <div>Продукт не найден</div>;
@@ -56,7 +68,7 @@ const ProductDetail: React.FC = () => {
         const payload = {
             order_items: [
                 {
-                    store_product_id: product.product_id,
+                    store_product_id: product.id,
                     product_amount: Math.max(1, Number(quantity)),
                 },
             ],
@@ -73,7 +85,15 @@ const ProductDetail: React.FC = () => {
 
             console.log('Order создан успешно:', orderData);
 
-            router.push(`/order-summary/${orderData.id}`);
+            // Формируем URL с query-параметрами
+            const queryParams = new URLSearchParams({
+                quantity: quantity.toString(),
+                totalPrice: (product.product.price * quantity).toString(),
+                productId: product.product_id,
+                total_price: orderData.total_price.toString(),
+            });
+
+            router.push(`/order-summary/${orderData.id}?${queryParams.toString()}`);
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 console.error('Ошибка сервера:', err.response?.data);
@@ -146,6 +166,14 @@ const ProductDetail: React.FC = () => {
         ]
     };
 
+    if (loading) {
+        return <Spin tip="Загрузка..." style={{ textAlign: 'center', marginTop: '20px' }} />;
+    }
+
+    if (error) {
+        return <Alert message={error} type="error" showIcon style={{ marginTop: '20px' }} />;
+    }
+
     return (
         <div className="page-container" style={{
             backgroundColor: 'var(--background)',
@@ -185,7 +213,7 @@ const ProductDetail: React.FC = () => {
                     gap: '0.5rem',
                 }}>
                     <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                        <p style={{color: '#653AD7', fontSize: '28px',}}>{product.price}</p>
+                        <p style={{color: '#653AD7', fontSize: '28px', lineHeight: '33px', fontWeight: '600'}}>{product.product.price} ₸</p>
                         <div style={{
                             color: '#999',
                             fontSize: '10px',
@@ -193,11 +221,11 @@ const ProductDetail: React.FC = () => {
                             padding: '4px',
                             borderRadius: '4px'
                         }}>
-                            <p>В наличии: {product.availableQuantity} шт.</p>
+                            <p>В наличии: {product?.availableQuantity || '0'} шт.</p>
                         </div>
                     </div>
 
-                    <p style={{fontSize: '1.25rem', color: '#212121',}}>{product.description}</p>
+                    <p style={{fontSize: '1.25rem', color: '#212121',}}>{product.product.other}</p>
 
                     <div style={{display: 'flex', gap: '20px'}}>
                         <div style={{
@@ -207,7 +235,7 @@ const ProductDetail: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <CarryOutOutlined style={{}}/>
+                            <img src="/Best-seller-16.svg" alt=""/>
                             <span style={{fontSize: '1rem'}}>Хит товар</span>
                         </div>
                         <div style={{
@@ -217,7 +245,7 @@ const ProductDetail: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <CarOutlined/>
+                            <img src="/car_outline_20.svg" alt=""/>
                             <span style={{fontSize: '1rem'}}>Бесплатная доставка</span>
                         </div>
                     </div>
@@ -297,18 +325,28 @@ const ProductDetail: React.FC = () => {
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '5px'
+                            gap: '5px',
+                            overflow: 'hidden',
                         }}>
-                            <h3>
-                                {product1.store.name}
-                            </h3>
+                            <h4 style={{
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                maxWidth: '100%',
+                                whiteSpace: 'normal',
+                                lineHeight: '1.5',
+                            }}>
+                                {storeData?.name}
+                            </h4>
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '10px',
                             }}>
-                                {product1.store.rating}
-                                <Rate disabled defaultValue={product1.store.rating}/>
+                                <p style={{
+                                    fontSize: '14px',
+                                    fontWeight: '400',
+                                }}>{storeData?.rating}</p>
+                                <RatingStars rating={storeData?.rating || 0} />
                             </div>
                         </div>
                     </div>
@@ -335,7 +373,7 @@ const ProductDetail: React.FC = () => {
                             marginTop: '10px'
                         }}
                     >
-                        {product.price} Купить
+                        {product.product.price} ₸ Купить
                     </Button>
                 </div>
                 {/* Модальное окно для выбора деталей продукта */}
@@ -354,7 +392,7 @@ const ProductDetail: React.FC = () => {
                                 fontWeight: '400',
                                 lineHeight: '16.71px',
                                 textAlign: 'left'
-                            }}>{product.description}</p>
+                            }}>{product.product.other}</p>
                             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                                 <div style={{textAlign: 'end'}}>
                                     <p style={{
@@ -362,7 +400,7 @@ const ProductDetail: React.FC = () => {
                                         fontWeight: '600',
                                         lineHeight: '19px',
                                         textAlign: 'left'
-                                    }}>{product.price} ₸</p>
+                                    }}>{product.product.price} ₸</p>
                                 </div>
                                 <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
                                     <Button
@@ -379,7 +417,7 @@ const ProductDetail: React.FC = () => {
                                             cursor: 'pointer',
                                         }}
                                     >
-                                        -
+                                        <img src="/Minus.svg" width={12.5} height={12.5} alt=""/>
                                     </Button>
                                     <span style={{fontSize: '18px', fontWeight: 'bold'}}>{quantity}</span>
                                     <Button
@@ -397,7 +435,7 @@ const ProductDetail: React.FC = () => {
                                             cursor: 'pointer',
                                         }}
                                     >
-                                        +
+                                        <img src="/plus.svg" width={12.5} height={12.5} alt=""/>
                                     </Button>
                                 </div>
                             </div>

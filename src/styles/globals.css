@@ -114,3 +114,9 @@ button {
     max-width: 100%;
   }
 }
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+  scrollbar-width: none;
+  msOverflowStyle: none;
+}

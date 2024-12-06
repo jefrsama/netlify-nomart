@@ -1,66 +1,70 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
-import ProductCard from '@/components/ProductCard';
-import {Tabs, Button, Row, Col, Space, Avatar, Spin, Alert} from 'antd';
-import {useParams, useRouter, useSearchParams} from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import {usePathname, useRouter} from 'next/navigation';
+import {Spin, Alert, Avatar, Card} from 'antd';
+import { fetchStoreData } from '@/store/storeSlice';
+import { RootState } from '@/store';
+import {useDispatch, useSelector} from 'react-redux';
+import { AppDispatch } from '@/store';
+import {useLoading} from "@/contexts/LoadingContext";
+import {CheckCircleOutlined, UserOutlined} from "@ant-design/icons";
+import {FaStar} from "react-icons/fa";
+import reviews from "@/app/mocks/reviews";
+import RatingStars from "@/components/RatingStars";
+import ReviewCard from "@/components/ReviewCard";
 import Image from 'next/image';
-import { UserOutlined, StarFilled, WhatsAppOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { getStoreByName } from '@/services/storeService';
+import { Product } from '@/store/types';
 
 const StorePage = ({ params }: { params: { name: string } }) => {
-  const storeName = params.name;
+    const { name } = params;
+    const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
+    const { store, isLoading, error } = useSelector((state: RootState) => state.store);
 
-  const [storeData, setStoreData] = useState<any | null>(null);
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+     const { setIsLoading } = useLoading();
+     const [activeTab, setActiveTab] = useState('1');
 
-   const router = useRouter();
+    useEffect(() => {
+        setIsLoading(true);
+        dispatch(fetchStoreData(name));
+    }, [dispatch, name, setIsLoading]);
 
-  useEffect(() => {
-    const fetchStoreData = async () => {
-      try {
-        const data = await getStoreByName(storeName);
-        setStoreData(data);
-        setProducts(
-            data.StoreProducts.map((p: any) => ({
-              id: p.product_id,
-              product_id: p.id,
-              name: p.product.name,
-              price: p.store_price,
-              image: p.product.images[0] || "https://via.placeholder.com/150",
-              description: p.product.other || "Описание отсутствует",
-              availableQuantity: 100,
-              rating: 4.5,
-            }))
-        );
-      } catch (err) {
-        setError("Ошибка при получении данных магазина.");
-      } finally {
-        setLoading(false);
-      }
+    if (isLoading) {
+        return <Spin tip="Загрузка..." style={{ textAlign: 'center', marginTop: '20px' }} />;
+    }
+
+    if (error) {
+        return <Alert message={error} type="error" showIcon style={{ marginTop: '20px' }} />;
+    }
+
+    const handleProductClick = (product: any) => {
+        sessionStorage.setItem("selectedProduct", JSON.stringify(product));
+        router.push(`/product/${product.product_id}`);
     };
 
-    fetchStoreData();
-  }, [storeName]);
+    const tabStyle = {
+        padding: '10px 20px',
+        cursor: 'pointer',
+        transition: 'border-bottom 0.3s ease, background-color 0.3s ease, opacity 0.3s ease',
+        color: 'rgb(153, 153, 153)',
+    };
 
-  if (loading) {
-    return <Spin tip="Загрузка..." style={{ textAlign: 'center', marginTop: '20px' }} />;
-  }
-
-  if (error) {
-    return <Alert message={error} type="error" showIcon style={{ marginTop: '20px' }} />;
-  }
-
-  const handleProductClick = (product: any) => {
-    sessionStorage.setItem("selectedProduct", JSON.stringify(product));
-    router.push(`/product/${product.product_id}`);
-  };
+    const activeTabStyle = {
+        ...tabStyle,
+        backgroundColor: 'rgba(255, 87, 32, 0.1)',
+        color: '#FF5720',
+        fontWeight: '500',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    };
 
   return (
       <div style={{
         backgroundColor: 'var(--background)',
+        width: '100%',
         minHeight: '100vh',
         margin: 0,
         padding: 0,
@@ -71,74 +75,325 @@ const StorePage = ({ params }: { params: { name: string } }) => {
       }} className="">
 
         {/* Store Header */}
-        <div style={{ }}>
-          <div style={{ position: 'relative', width: '100%', height: '150px', overflow: 'hidden' }}>
-            {/* Background image */}
-            <Image
-                src="/background.jpg"
-                alt="Store Background"
-                layout="fill"
-                objectFit="cover"
-                priority={true}
-            />
+          <div className="scrollContainer" style={{
+              flexGrow: 1,
+              overflowY: 'auto',
+          }}>
+              <div style={{position: 'relative', width: '100%', height: '150px', overflow: 'hidden'}}>
+                  {/* Background image */}
+                  <Image
+                      src="/store_background.jpg"
+                      alt="Store Background"
+                      layout="fill"
+                      objectFit="cover"
+                      priority={true}
+                  />
+              </div>
+
+              <div style={{backgroundColor: '#fff', position: 'relative', top: '-10px'}}>
+                  <div style={{width: '100%', padding: '10px 20px', display: 'flex', gap: '15px'}}>
+                      <div style={{position: 'relative'}}>
+                          <Avatar size={90} icon={store?.logo ?
+                              <Image src={store?.logo} alt={store?.user?.avatar || 'User Avatar'} width={64} height={64}/> :
+                              <UserOutlined/>}
+                          />
+
+                          <div style={{
+                              backgroundColor: '#fff',
+                              height: '25px',
+                              position: 'absolute',
+                              width: '50px',
+                              left: '23%',
+                              bottom: '-6px',
+                              borderRadius: '30%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                          }}>
+                              <FaStar style={{ color: '#FFD43A', fontSize: '16px' }} />
+                              <p style={{
+                                  fontSize: '14px',
+                                  color: '#333',
+                                  lineHeight: '1',
+                                  fontWeight: 'bold',
+                              }}>{store?.rating}</p>
+                         </div>
+                    </div>
+              <div style={{
+                  width: '70%',
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  alignItems: 'center',
+                  margin: '0 8%',
+              }}>
+                          <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              fontSize: '16px',
+                          }}>
+                              <span>{/*{store?.subscribers || 0}*/} пока 0(надо добавить)</span>
+                              <span style={{
+                                  color: 'rgb(153, 153, 153)',
+                              }}>Подписчиков</span>
+                          </div>
+                          <hr style={{
+                              width: '1px',
+                              height: '25px',
+                              backgroundColor: '#000',
+                              border: 'none',
+                              margin: '0 auto',
+                              opacity: '0.3'
+                          }}/>
+                          <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              fontSize: '16px',
+                          }}>
+                              <span>{store?.storeProducts?.length || 0}</span>
+                              <span style={{
+                                  color: 'rgb(153, 153, 153)',
+                              }}>Товары</span>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div style={{padding: '10px 20px', width: '100%', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {/* Store name */}
+                      <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+                          <h2 style={{
+                              wordWrap: 'break-word',
+                              overflowWrap: 'break-word',
+                              maxWidth: '100%',
+                              whiteSpace: 'normal',
+                              lineHeight: '1.5',
+                              fontSize: '20px'
+                          }}>{store?.name}</h2>
+                          {store?.is_verified &&
+                              <CheckCircleOutlined style={{color: '#34eb43', fontSize: '24px'}}/>}
+                      </div>
+                      <p>
+                          {store?.description}
+                      </p>
+                  </div>
+
+                  {/* Навигация по вкладкам */}
+                  <div style={{
+                      display: 'flex',
+                      width: '100%',
+                      padding: '0 20px 5px 20px',
+                      justifyContent: 'center',
+                      gap: '20px',
+                      alignItems: 'center',
+                      fontSize: '14px',
+                  }}>
+                      <div
+                          style={activeTab === '1' ? activeTabStyle : tabStyle}
+                          onClick={() => setActiveTab('1')}
+                      >
+                          Все
+                      </div>
+                      <div
+                          style={activeTab === '2' ? activeTabStyle : tabStyle}
+                          onClick={() => setActiveTab('2')}
+                      >
+                          Гарантия
+                      </div>
+                      <div
+                          style={activeTab === '3' ? activeTabStyle : tabStyle}
+                          onClick={() => setActiveTab('3')}
+                      >
+                          Отзывы
+                      </div>
+                  </div>
+              </div>
+
+              <div style={{
+
+              }}>
+                  {/* Контент вкладки */}
+                  <div style={{ overflow: 'hidden' }}>
+                      {activeTab === '1' && (
+                          <div style={{
+                              padding: '10px 20px',
+                              overflow: 'hidden',
+                          }}>
+                              <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  gap: '3%',
+                              }}>
+                                  {Array.isArray(store?.storeProducts) && store.storeProducts.length > 0 ? (
+                                      store.storeProducts.map((product: Product) => (
+                                          <div
+                                              key={product.id}
+                                              style={{
+                                                  width: '48%',
+                                                  cursor: 'pointer',
+                                                  display: 'flex',
+                                                  flexDirection: 'column',
+                                                  justifyContent: 'space-between',
+                                                  height: 'auto',
+                                                  boxSizing: 'border-box',
+                                                  overflow: 'hidden',
+                                                  borderRadius: '10px',
+                                                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                                  backgroundColor: '#fff',
+                                                  marginBottom: '10px',
+                                              }}
+                                              onClick={() => handleProductClick(product)}
+                                          >
+                                              <div style={{
+                                                  position: 'relative',
+                                                  overflow: 'hidden'
+                                              }}>
+                                                  <img
+                                                      alt={product.product.name}
+                                                      src={"https://via.placeholder.com/150"}
+                                                      style={{
+                                                          width: '100%',
+                                                          height: 'auto',
+                                                          objectFit: 'cover',
+                                                      }}
+                                                  />
+                                              </div>
+                                              <div style={{marginTop: '10px', textAlign: 'left', padding: '0 10px'}}>
+                                                  <p
+                                                      style={{
+                                                          fontSize: '14px',
+                                                          fontWeight: 'bold',
+                                                          color: '#333',
+                                                          margin: 0,
+                                                          overflow: 'hidden',
+                                                          whiteSpace: 'nowrap',
+                                                          textOverflow: 'ellipsis',
+                                                      }}
+                                                  >
+                                                      {product.product.name}
+                                                  </p>
+                                                  <p
+                                                      style={{
+                                                          fontSize: '16px',
+                                                          fontWeight: 'bold',
+                                                          color: '#7b4ddb',
+                                                          margin: '5px 0',
+                                                      }}
+                                                  >
+                                                      {`${product.product.price} ₸`}
+                                                  </p>
+                                              </div>
+                                              <div
+                                                  style={{
+                                                      display: 'flex',
+                                                      alignItems: 'center',
+                                                      marginTop: '5px',
+                                                      padding: '0 10px 10px 10px'
+                                                  }}
+                                              >
+                                                  <FaStar
+                                                      style={{color: '#FFD43A', fontSize: '14px', marginRight: '4px'}}/>
+                                                  <span style={{
+                                                      fontSize: '12px',
+                                                      color: '#333'
+                                                  }}>{store.rating}</span>
+                                                  <span style={{fontSize: '12px', color: '#CBCFD4', marginLeft: '8px', display: 'flex', alignItems: 'center', gap: '5px'}}>
+                                                     <img src="/Ellipse.svg" alt=""/> {`${store.rating} отзыва`}
+                                                  </span>
+                                              </div>
+                                          </div>
+
+                                      ))
+                                  ) : (
+                                      <div style={{textAlign: 'center', width: '100%'}}>
+                                          <p>Добавить товар</p>
+                                      </div>
+                                  )}
+                              </div>
+                          </div>
+                      )}
+                      {activeTab === '2' && (
+                          <div style={{
+                              padding: '10px 20px',
+                              overflow: 'hidden',
+                          }}>
+                              <p>Гарантийная информация.</p>
+                          </div>
+                      )}
+                      {activeTab === '3' && (
+                          <div style={{
+                              padding: '10px 20px',
+                              overflow: 'hidden',
+                              backgroundColor: '#fff',
+                          }}>
+                              {/* Если еще идет загрузка отзывов */}
+                              {isLoading ? (
+                                  <Spin tip="Загрузка отзывов..." style={{textAlign: 'center', marginTop: '20px'}}/>
+                              ) : reviews.length === 0 ? (
+                                  <p>Нет отзывов</p>
+                              ) : (
+                                  <div>
+                                      <div style={{
+                                          backgroundColor: '#F2F2F2',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          flexDirection: 'column',
+                                          padding: '15px',
+                                          marginBottom: '15px',
+                                          border: '1px solid #ddd',
+                                          borderRadius: '8px',
+                                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                          gap: '5px'
+                                      }}>
+                                          <p style={{
+                                            color: '#99A2AD',
+                                            fontSize: '12px',
+                                            fontWeight: '500',
+                                          }}>
+                                              Рейтинг магазина
+                                          </p>
+                                          <RatingStars rating={store?.rating || 0} />
+                                          <p style={{
+                                              color: '#212121',
+                                              fontSize: '22px',
+                                              fontWeight: '600',
+                                              display: 'flex',
+                                              gap: '5px',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                          }}>
+                                              {store?.rating}
+                                              <span style={{
+                                                  color: '#99A2AD',
+                                                  fontSize: '14px',
+                                                  fontWeight: '500',
+                                              }}>
+                                                  / 5
+                                              </span>
+                                          </p>
+                                      </div>
+
+                                      {/* Карточки с отзывами */}
+                                      {reviews.map((review, index) => (
+                                          <ReviewCard
+                                              key={index}
+                                              user={review.user}
+                                              rating={review.rating}
+                                              comment={review.comment}
+                                              date={review.date}
+                                              images={review.images}
+                                          />
+                                      ))}
+                                  </div>
+                              )}
+                          </div>
+                      )}
+                  </div>
+              </div>
           </div>
-
-          <div style={{backgroundColor: '#fff'}}>
-            <div style={{width: '100%', padding: '20px', display: 'flex', gap: '20px'}}>
-              <div style={{width: '30%'}}>
-                <Avatar size={90} icon={storeData?.logo ?
-                    <Image src={storeData?.logo} alt={storeData?.name} width={64} height={64}/> : <UserOutlined/>}/>
-              </div>
-              <div style={{width: '100%', display: 'flex', justifyContent: 'space-around', alignItems: 'center'}}>
-                <div style={{fontSize: '16px'}}>{storeData?.subscribers || 0} Подписчиков</div>
-                <div style={{fontSize: '16px'}}>{products.length} Товаров</div>
-              </div>
-            </div>
-
-            <div style={{padding: '20px', width: '100%', display: 'flex', flexDirection: 'column', gap: '6px'}}>
-              {/* Store name */}
-              <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
-                <h1 style={{fontSize: '24px', fontWeight: 'bold', maxWidth: '100%'}}>{storeData?.name}</h1>
-                {storeData?.is_verified && <CheckCircleOutlined style={{color: '#34eb43', fontSize: '24px'}}/>}
-              </div>
-              <p>
-                {storeData?.description}
-              </p>
-              {/* Store rating */}
-            </div>
-
-            <div style={{padding: '20px', width: '100%', display: 'flex', gap: '20px', alignItems: 'center'}}>
-              <WhatsAppOutlined style={{color: 'orange', fontSize: '26px'}}/>
-              <Button block type="primary"
-                      style={{padding: '20px 30px', fontSize: '16px', width: '100%'}}>Подписаться</Button>
-            </div>
-            {/* Tabbed Content */}
-            <Tabs defaultActiveKey="1" centered style={{padding: '0 20px'}}>
-              <Tabs.TabPane tab="Все" key="1">
-                <Row gutter={[16, 16]}>
-                  {products.length > 0 ? products.map((product) => (
-                      <Col key={product.id} xs={12} sm={12} lg={12} onClick={() => handleProductClick(product)}>
-                        <ProductCard product={product}/>
-                      </Col>
-                  )) : (
-                      <Col span={24} style={{ textAlign: 'center' }}>
-                        <p>Добавить товар</p>
-                      </Col>
-                  )}
-                </Row>
-              </Tabs.TabPane>
-              <Tabs.TabPane tab="Акции" key="2">
-                <p>Здесь будут акции.</p>
-              </Tabs.TabPane>
-              <Tabs.TabPane tab="Гарантия" key="3">
-                <p>Гарантийная информация.</p>
-              </Tabs.TabPane>
-              <Tabs.TabPane tab="Отзывы" key="4">
-                <p>Отзывы покупателей.</p>
-              </Tabs.TabPane>
-            </Tabs>
-          </div>
-        </div>
       </div>
   );
 };
