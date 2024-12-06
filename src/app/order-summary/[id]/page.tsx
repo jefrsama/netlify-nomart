@@ -130,7 +130,7 @@ const OrderSummary = () => {
                         borderRadius: '8px',
                         marginBottom: '20px'
                     }}>
-                        <Image src={product.product.image || 'https://placehold.co/500'} alt={product.product.name} width={80} height={80}
+                        <Image src={'https://placehold.co/500'} alt={product.product.name} width={80} height={80}
                                style={{borderRadius: '8px', marginRight: '15px'}}/>
                         <div style={{flexGrow: 1}}>
                             <p style={{fontWeight: '500', marginBottom: '5px'}}>{product.product.other}</p>
@@ -175,8 +175,8 @@ const OrderSummary = () => {
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <div style={{display: 'flex', gap: '10px',}}>
-                            <p style={{fontSize: '12px', color: '#999'}}>{product.product.color || 'color'}</p>
-                            <p style={{fontSize: '12px', color: '#999'}}>{product.product.weight || 'weight'}</p>
+                            <p style={{fontSize: '12px', color: '#999'}}>{/*product.product.color ||*/} { 'color'}</p>
+                            <p style={{fontSize: '12px', color: '#999'}}>{/*product.product.weight ||*/}{ 'weight'}</p>
                         </div>
                         <div style={{fontWeight: '600', fontSize: '18px', color: 'black'}}>
                             {calculatedTotalPrice} т
