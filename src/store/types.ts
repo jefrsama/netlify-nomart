@@ -4,7 +4,7 @@ import {Store} from "redux";
 export interface StoreState {
     store: {
       // Define the shape of your store slice state
-      data: Store | null; // Replace with the actual type of your data
+      data: Store | null;
       loading: boolean;
       error: string | null;
     };

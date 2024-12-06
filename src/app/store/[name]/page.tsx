@@ -28,8 +28,10 @@ const StorePage = ({ params }: { params: { name: string } }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log('Загрузка данных...');
                 setIsLoading(true);
                 await dispatch(fetchStoreData(name));
+                console.log('Данные загружены');
             } catch (err) {
                 console.error("Ошибка при загрузке данных магазина:", err);
             } finally {
