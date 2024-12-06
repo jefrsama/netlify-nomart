@@ -268,7 +268,7 @@ const StorePage = ({ params }: { params: { name: string } }) => {
                                               }}>
                                                   <img
                                                       alt={product.product.name}
-                                                      src={"https://via.placeholder.com/150"}
+                                                      src="https://via.placeholder.com/150"
                                                       style={{
                                                           width: '100%',
                                                           height: 'auto',
