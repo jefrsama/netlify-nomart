@@ -11,7 +11,6 @@ import axios, {AxiosError} from "axios";
 import { createOrder } from '@/services/orderService';
 import AuthModal from "@/components/AuthModal";
 import { useLoading } from '@/contexts/LoadingContext';
-import {getStoreByName} from "@/services/storeService";
 import {useSelector} from "react-redux";
 import {RootState, store} from "@/store";
 import {fetchStoreData} from "@/store/storeSlice";
@@ -328,15 +327,17 @@ const ProductDetail: React.FC = () => {
                             gap: '5px',
                             overflow: 'hidden',
                         }}>
-                            <h4 style={{
+                            <p style={{
                                 wordWrap: 'break-word',
                                 overflowWrap: 'break-word',
-                                maxWidth: '100%',
+                                maxWidth: '90%',
                                 whiteSpace: 'normal',
                                 lineHeight: '1.5',
+                                fontWeight: '500',
+                                fontSize: '16px'
                             }}>
                                 {storeData?.name}
-                            </h4>
+                            </p>
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',

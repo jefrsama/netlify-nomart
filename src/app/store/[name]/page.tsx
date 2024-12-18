@@ -35,7 +35,7 @@ const StorePage = ({ params }: { params: { name: string } }) => {
             } catch (err) {
                 console.error("Ошибка при загрузке данных магазина:", err);
             } finally {
-                setIsLoading(false);
+                setIsLoading(false);    
             }
         };
         fetchData();
@@ -121,7 +121,7 @@ const StorePage = ({ params }: { params: { name: string } }) => {
                               width: '50px',
                               left: '23%',
                               bottom: '-6px',
-                              borderRadius: '30%',
+                              borderRadius: '8px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -150,7 +150,7 @@ const StorePage = ({ params }: { params: { name: string } }) => {
                               alignItems: 'center',
                               fontSize: '16px',
                           }}>
-                              <span>{/*{store?.subscribers || 0}*/} пока 0(надо добавить)</span>
+                              <span>{/*{store?.subscribers || 0}*/} 0</span>
                               <span style={{
                                   color: 'rgb(153, 153, 153)',
                               }}>Подписчиков</span>
@@ -180,14 +180,15 @@ const StorePage = ({ params }: { params: { name: string } }) => {
                   <div style={{padding: '10px 20px', width: '100%', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                       {/* Store name */}
                       <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
-                          <h2 style={{
+                          <p style={{
                               wordWrap: 'break-word',
                               overflowWrap: 'break-word',
-                              maxWidth: '100%',
+                              maxWidth: '90%',
                               whiteSpace: 'normal',
                               lineHeight: '1.5',
-                              fontSize: '20px'
-                          }}>{store?.name}</h2>
+                              fontSize: '20px',
+                              fontWeight: '500',
+                          }}>{store?.name}</p>
                           {store?.is_verified &&
                               <CheckCircleOutlined style={{color: '#34eb43', fontSize: '24px'}}/>}
                       </div>
@@ -280,7 +281,7 @@ const StorePage = ({ params }: { params: { name: string } }) => {
                                                   <p
                                                       style={{
                                                           fontSize: '14px',
-                                                          fontWeight: 'bold',
+                                                          fontWeight: '500',
                                                           color: '#333',
                                                           margin: 0,
                                                           overflow: 'hidden',

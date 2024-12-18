@@ -11,7 +11,7 @@
 
         useEffect(() => {
             if (isOpen) {
-                setIsVisible(true);
+                setTimeout(() => setIsVisible(true), 300);
             } else {
                 setTimeout(() => setIsVisible(false), 300);
             }
@@ -44,7 +44,7 @@
                         width: '100%',
                         boxShadow: '0px -5px 15px rgba(0, 0, 0, 0.3)',
                         transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
-                        transition: 'transform 0.5s ease',
+                        transition: 'transform 0.3s ease',
                         height: 'auto',
                         maxHeight: '90vh',
                         overflowY: 'auto',
@@ -56,8 +56,8 @@
                         onClick={onClose}
                         style={{
                             position: 'absolute',
-                            top: '10px',
-                            right: '10px',
+                            top: '0px',
+                            right: '0px',
                             background: 'transparent',
                             border: 'none',
                             fontSize: '20px',
@@ -67,8 +67,6 @@
                     >
                         <img src="/x.svg" alt=""/>
                     </button>
-
-
                     {children}
                 </div>
             </div>

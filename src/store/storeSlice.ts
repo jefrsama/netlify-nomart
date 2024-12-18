@@ -37,13 +37,31 @@ export const fetchStoreData = createAsyncThunk(
     'store/fetchStoreData',
     async (name: string, { rejectWithValue }) => {
         try {
-            const data: Store = await getStoreByName(name); // Указываем тип данных для результата
+            const data: Store = await getStoreByName(name);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
     }
 );
+
+// когда будем субдомен использовать
+// export const fetchStoreData = createAsyncThunk(
+//     'store/fetchStoreData',
+//     async (_, { rejectWithValue }) => {
+//         try {
+//             const storename = getStoreNameFromURL(); // Получаем storename из URL
+//             if (!storename) {
+//                 throw new Error('Не удалось определить название магазина');
+//             }
+//             const data: Store = await getStoreByName(storename); // Вызываем API с этим storename
+//             return data;
+//         } catch (error: any) {
+//             return rejectWithValue(error.message);
+//         }
+//     }
+// );
+
 
 // Slice для управления состоянием магазина
 const storeSlice = createSlice({
